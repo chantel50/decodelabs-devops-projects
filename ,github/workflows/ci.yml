@@ -2,21 +2,32 @@ name: CI Pipeline
 
 on:
   push:
-    branches:
-      - main
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
 
 jobs:
-  build:
+  build-and-test:
     runs-on: ubuntu-latest
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
 
-      - name: Build step
-        run: echo "Building the project..."
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
 
-      - name: Test step
-        run: echo "Running tests... All tests passed!"
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install pyflakes
 
-      - name: Deploy step
-        run: echo "Deployment ready!"
+      - name: Lint code
+        run: |
+          pyflakes src/task_manager.py
+
+      - name: Run tests
+        run: |
+          python src/test_task_manager.py      
